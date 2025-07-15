@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Screen Break Timer</title>
+
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      background-color: rgba(0, 0, 0, 0);
+      animation: fadeInBackground 4s ease-in-out forwards;
+      font-family: sans-serif;
+    }
+
+    @keyframes fadeInBackground {
+      0%   { background-color: rgba(0, 0, 0, 0); }
+      100% { background-color: rgba(0, 0, 0, 0.85); }
+    }
+
+    .background-outside-circle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      animation: fadeInOutBackgroundOutsideCircle 6s alternate infinite;
+      z-index: -2;
+    }
+
+    @keyframes fadeInOutBackgroundOutsideCircle {
+      0%, 100% { background-color: rgba(0, 0, 0, 0.8); }
+      50%      { background-color: rgba(0, 0, 0, 0.6); }
+    }
+
+    .lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 18px,
+        rgba(255,255,255,0.1) 18px,
+        rgba(255,255,255,0.1) 20px
+      );
+      animation: moveLines 6s linear infinite;
+    }
+
+    @keyframes moveLines {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-100px); }
+    }
+
+    .timer-container {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle, #444 0%, #222 100%);
+      animation: changeCircleColor 6s ease-in-out infinite;
+      box-shadow: 0 0 30px 10px rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes changeCircleColor {
+      0%   { background-color: #444; }
+      50%  { background-color: #666; }
+      100% { background-color: #444; }
+    }
+
+    .timer {
+      text-align: center;
+      font-size: 3rem;
+      color: #fff;
+      z-index: 1;
+    }
+
+    .pro-badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background-color: #00cc66;
+      color: white;
+      font-weight: bold;
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      border-radius: 20px;
+      box-shadow: 0 0 8px rgba(0, 255, 100, 0.7);
+    }
+
+    .welcome-message {
+      display: none;
+      font-size: 1.2rem;
+      color: #0f0;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-outside-circle"></div>
+  <div class="lines"></div>
+
+  <div class="timer-container">
+    <div class="timer">
+      <span id="countdown">00:00</span>
+      <div id="welcomeMessage" class="welcome-message">✅ Welcome back!</div>
+    </div>
+    <div class="pro-badge">PRO</div>
+  </div>
+
+  <script>
+    const countdownElement = document.getElementById("countdown");
+    const welcomeMessage = document.getElementById("welcomeMessage");
+    const proBadge = document.querySelector(".pro-badge");
+
+    let seconds = 0;
+    let timer;
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${m}:${r < 10 ? '0' : ''}${r}`;
+    }
+
+    function showProBadge() {
+      proBadge.style.display = "block";
+    }
+
+    function hideProBadge() {
+      proBadge.style.display = "none";
+    }
+
+    function updateCountdown() {
+      countdownElement.textContent = formatTime(seconds);
+      seconds--;
+
+      if (seconds < 0) {
+        clearInterval(timer);
+        countdownElement.textContent = "00:00";
+        welcomeMessage.style.display = "block";
+        hideProBadge();
+      }
+    }
+
+    function startTimer() {
+      let input = prompt("Enter break duration (in minutes):", "1");
+      if (!input || isNaN(input) || input <= 0) {
+        alert("Invalid input! Defaulting to 20 seconds.");
+        seconds = 20;
+      } else {
+        seconds = parseInt(input) * 60;
+      }
+
+      countdownElement.textContent = formatTime(seconds);
+      welcomeMessage.style.display = "none";
+      showProBadge();
+      timer = setInterval(updateCountdown, 1000);
+    }
+
+    startTimer(); // prompt user on page load
+  </script>
+</body>
+</html>
