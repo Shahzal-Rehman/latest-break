@@ -55,6 +55,14 @@
       border: none;
     }
 
+    .input-section select {
+      padding: 10px;
+      font-size: 1rem;
+      margin-left: 5px;
+      border-radius: 10px;
+      border: none;
+    }
+
     .input-section button {
       padding: 10px 20px;
       margin-left: 10px;
@@ -70,15 +78,24 @@
       background-color: #00aa55;
     }
 
-    .message, .analytics-report {
+    .message, .analytics-report, .device-warning {
       margin-top: 15px;
       font-size: 1rem;
+      text-align: center;
+    }
+
+    .message {
       color: #0f0;
     }
 
     .analytics-report {
       color: #aaa;
       font-size: 0.9rem;
+    }
+
+    .device-warning {
+      color: #ff6666;
+      font-weight: bold;
     }
 
     footer {
@@ -95,12 +112,17 @@
   </div>
 
   <div class="input-section">
-    <input type="number" id="minutes" placeholder="Break (min)" min="1" />
+    <input type="number" id="timeValue" placeholder="Enter time" min="1" />
+    <select id="timeUnit">
+      <option value="seconds">Seconds</option>
+      <option value="minutes">Minutes</option>
+    </select>
     <button onclick="startBreak()">Start</button>
   </div>
 
   <div class="message" id="breakMessage"></div>
   <div class="analytics-report" id="analytics"></div>
+  <div class="device-warning" id="deviceWarning"></div>
 
   <footer>
     &copy; 2025 Shahzal Rehman | TimeGuardians | Digital Wellness Initiative
@@ -110,8 +132,22 @@
     let countdownEl = document.getElementById("countdown");
     let breakMessage = document.getElementById("breakMessage");
     let analyticsEl = document.getElementById("analytics");
+    let deviceWarning = document.getElementById("deviceWarning");
     let timer;
     let totalSeconds = 0;
+
+    const warningMessages = [
+      "📱 Mobile device detected — higher eye strain risk due to proximity.",
+      "💡 Bright screen alert — consider reducing brightness to reduce melatonin suppression.",
+      "🛏️ Using in bed? This can disrupt your circadian rhythm. Take breaks often!",
+      "📱 Excessive mobile use linked with emotional dysregulation. Consider limiting scrolling.",
+      "💻 Laptop usage is safer but still requires breaks to avoid CVS.",
+      "🔋 Lower your screen brightness to avoid long-term vision strain.",
+      "📴 Passive scrolling detected — consider switching to active learning activities.",
+      "🧠 Breaks reset your dopamine loop — you're doing your brain a favor!",
+      "🎯 Attention fatigue builds with nonstop usage. Good job interrupting that.",
+      "🧍‍♂️ Get up, stretch, hydrate — your posture and metabolism need a break too!"
+    ];
 
     function formatTime(s) {
       const m = Math.floor(s / 60);
@@ -119,14 +155,34 @@
       return `${m}:${r < 10 ? '0' + r : r}`;
     }
 
+    function detectDeviceAndBrightness() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const ratio = window.devicePixelRatio;
+      const brightness = window.screen.brightness || 1.0; // fallback
+
+      let msg = "";
+      if (width < 768 || /Mobi|Android/i.test(navigator.userAgent)) {
+        msg = "📱 Mobile Detected — Use at safe distance to prevent damage.";
+      } else {
+        msg = "💻 Likely Desktop/Laptop — ergonomic setup is key.";
+      }
+
+      const randomIndex = Math.floor(Math.random() * warningMessages.length);
+      deviceWarning.innerText = msg + "\n" + warningMessages[randomIndex];
+    }
+
     function startBreak() {
-      const minutes = parseInt(document.getElementById("minutes").value);
-      if (!minutes || minutes <= 0) {
-        alert("Please enter a valid break time in minutes.");
+      const value = parseInt(document.getElementById("timeValue").value);
+      const unit = document.getElementById("timeUnit").value;
+      if (!value || value <= 0) {
+        alert("Please enter a valid time.");
         return;
       }
 
-      totalSeconds = minutes * 60;
+      detectDeviceAndBrightness();
+
+      totalSeconds = unit === "minutes" ? value * 60 : value;
       countdownEl.textContent = formatTime(totalSeconds);
       breakMessage.textContent = "Break started. Stay mindful...";
       analyticsEl.textContent = "Recording session data...";
